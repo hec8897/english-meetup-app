@@ -1,0 +1,5 @@
+.card { display: flex; flex-direction: column; gap: 14px; }
+.top { display: flex; gap: 12px; align-items: flex-start; }
+.ko { font-size: 18px; font-weight: 600; line-height: 1.5; }
+.hint { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.model { font-size: 14px; color: var(--muted); }

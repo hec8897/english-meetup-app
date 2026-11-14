@@ -1,0 +1,10 @@
+.box { padding: 14px 16px; border-radius: var(--r-md); }
+.good { background: var(--blue-light); }
+.fix { background: var(--amber-bg); }
+.head { font-weight: 700; font-size: 15px; }
+.good .head { color: var(--blue); }
+.fix .head { color: var(--amber-text); }
+.line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 8px; font-size: 16px; }
+.old { color: var(--muted); text-decoration: line-through; }
+.new { color: var(--ink); }
+.reason { margin-top: 8px; font-size: 14px; color: var(--text-2); }

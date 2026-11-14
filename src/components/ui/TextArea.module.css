@@ -1,0 +1,17 @@
+.ta {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--white);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.ta:focus {
+  border-color: var(--blue);
+  outline: none;
+}
+.ta::placeholder {
+  color: var(--muted);
+}

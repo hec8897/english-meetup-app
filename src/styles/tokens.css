@@ -1,0 +1,36 @@
+/* 디자인 시스템 A안 (블루) 토큰 */
+:root {
+  /* color */
+  --blue: #1b64da;
+  --blue-2: #3182f6;
+  --blue-light: #e8f3ff;
+  --ink: #191f28;
+  --text-2: #4e5968;
+  --muted: #6b7684;
+  --border: #d1d6db;
+  --bg: #f2f4f6;
+  --fill: #e5e8eb;
+  --white: #ffffff;
+  --pink: #ffe9e9;
+  --red: #c62828;
+  --amber-bg: #fff3d6;
+  --amber-text: #8a5a00;
+  --toast-bg: #333d4b;
+  --dim: rgba(25, 31, 40, 0.6);
+
+  /* radius */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* type */
+  --font: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+
+  /* layout */
+  --frame-w: 430px;
+  --pad-x: 20px;
+  --touch: 44px;
+}

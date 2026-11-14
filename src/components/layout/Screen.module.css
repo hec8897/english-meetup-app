@@ -1,0 +1,32 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px var(--pad-x) 0;
+}
+.main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px var(--pad-x) 24px;
+}
+.footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  gap: 12px;
+  padding: 24px var(--pad-x) max(20px, env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, rgba(242, 244, 246, 0), var(--bg) 32%);
+}
+
+.footer > * {
+  flex: 1 1 0;
+  min-width: 0;
+}

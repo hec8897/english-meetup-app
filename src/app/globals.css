@@ -1,0 +1,77 @@
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+@import "../styles/tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+textarea {
+  resize: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.frame {
+  width: 100%;
+  max-width: var(--frame-w);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+}
+@media (min-width: 480px) {
+  body { background: #e5e8eb; }
+  .frame { box-shadow: 0 0 0 1px rgba(25, 31, 40, 0.04); }
+}
+.page-title { font-size: 26px; font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; }
+.sub { color: var(--muted); font-size: 15px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }

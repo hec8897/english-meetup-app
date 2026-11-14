@@ -1,0 +1,30 @@
+.steps {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.step {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.reached .bar {
+  background: var(--blue);
+}
+.reached {
+  color: var(--text-2);
+}
+.current {
+  color: var(--blue);
+  font-weight: 800;
+}

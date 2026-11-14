@@ -1,0 +1,43 @@
+.dim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--dim);
+}
+.bottom { align-items: flex-end; padding: 0; }
+.dialog {
+  width: 100%;
+  max-width: 340px;
+  padding: 28px 20px 20px;
+  border-radius: var(--r-xl);
+  background: var(--white);
+  animation: fade 0.16s ease-out;
+}
+.sheet {
+  width: 100%;
+  max-width: var(--frame-w);
+  max-height: 85dvh;
+  overflow: auto;
+  padding: 12px 20px max(24px, env(safe-area-inset-bottom));
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--white);
+  animation: slide 0.2s ease-out;
+}
+.grab {
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 16px;
+  border-radius: 2px;
+  background: var(--fill);
+}
+.title { font-size: 20px; font-weight: 700; line-height: 1.4; }
+.desc { margin-top: 8px; color: var(--text-2); font-size: 15px; }
+.actions { display: flex; gap: 10px; margin-top: 24px; }
+@keyframes fade { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes slide { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .dialog, .sheet { animation: none; } }

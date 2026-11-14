@@ -1,0 +1,16 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  background: var(--white);
+}
+.compact {
+  padding: 16px;
+  gap: 12px;
+}
+.blue {
+  background: var(--blue-light);
+  border-radius: var(--r-md);
+}

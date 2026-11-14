@@ -1,0 +1,12 @@
+.body { display: flex; flex-direction: column; gap: 1.1em; padding: 24px 20px; border-radius: var(--r-lg); background: var(--white); }
+.p { line-height: 1.8; color: var(--ink); }
+.word {
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid var(--blue-2);
+  border-radius: 3px 3px 0 0;
+  background: var(--blue-light);
+  color: var(--blue);
+  font: inherit;
+  font-weight: 600;
+}
