@@ -7,9 +7,12 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
+  useState,
   type ReactNode,
 } from "react";
 import type { Passage, PracticeItem, TalkQuestion, WriteItem } from "@/entities/passage";
+import { fetchProgress, saveProgress } from "@/shared/api/progress";
 import type { CheckResult } from "@/shared/api/services";
 import type { FontScale, Lang } from "@/shared/layout/ReadingControls";
 
@@ -101,6 +104,8 @@ const STORAGE_KEY = "english-meetup:session:v1";
 
 interface SessionApi {
   state: SessionState;
+  /** 서버 상태를 받아 온(또는 실패해 로컬로 확정한) 지문 id. 이 값이 passageId와 같아야 화면을 그린다. */
+  loadedId: string | null;
   start: (passage: Passage) => void;
   set: (patch: Partial<SessionState>) => void;
   addTalk: (items: TalkQuestion[]) => void;
@@ -138,6 +143,69 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
+  // 서버가 원본, sessionStorage는 새로고침 복구용 캐시.
+  const [loadedId, setLoadedId] = useState<string | null>(null);
+  // PUT 허용 지문: GET이 성공했을 때만. 실패 시 서버 진도를 로컬 상태로 덮지 않게 저장 안 함. 같은 커밋의 PUT 효과가 바로 보도록 ref.
+  const savableRef = useRef<string | null>(null);
+  const pending = useRef<{ id: string; state: SessionState } | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const flush = useCallback((keepalive = false) => {
+    const p = pending.current;
+    if (!p) return;
+    pending.current = null;
+    saveProgress(p.id, p.state, { keepalive }).catch((e) => console.warn("진행 상태 저장 실패", e));
+  }, []);
+
+  // 지문이 정해지거나 바뀌면 서버 상태를 한 번 받아 온다.
+  useEffect(() => {
+    const id = state.passageId;
+    if (!state.ready || !id) return;
+    flush(); // 이전 지문의 디바운스 대기분을 먼저 보낸다
+    savableRef.current = null;
+    setLoadedId(null);
+    const ctrl = new AbortController();
+    fetchProgress<SessionState>(id, ctrl.signal)
+      .then((remote) => {
+        if (ctrl.signal.aborted) return;
+        savableRef.current = id;
+        if (!remote) return;
+        const { lang, fontScale } = stateRef.current;
+        // lang·fontScale은 기기 설정이라 다른 기기에서 저장된 값보다 지금 로컬 값을 유지한다.
+        dispatch({ type: "hydrate", state: { ...empty, ...remote, passageId: id, lang, fontScale } });
+      })
+      .catch((e) => {
+        if (!ctrl.signal.aborted) console.warn("진행 상태 불러오기 실패, 로컬로 계속(이 지문은 서버 저장 안 함)", e);
+      })
+      .finally(() => {
+        if (ctrl.signal.aborted) return;
+        setLoadedId(id);
+      });
+    return () => ctrl.abort(); // 늦게 온 이전 지문 응답이 현재 상태를 덮지 않게
+  }, [state.ready, state.passageId, flush]);
+
+  // 서버 hydrate가 끝난 지문만 800ms 디바운스로 PUT
+  useEffect(() => {
+    if (!state.ready || !state.passageId || savableRef.current !== state.passageId) return;
+    pending.current = { id: state.passageId, state };
+    const t = setTimeout(() => flush(), 800);
+    return () => clearTimeout(t);
+  }, [state, loadedId, flush]);
+
+  // 탭 이탈·언마운트 시 마지막 변경 flush
+  useEffect(() => {
+    const onHide = () => flush(true);
+    const onVis = () => document.visibilityState === "hidden" && flush(true);
+    window.addEventListener("pagehide", onHide);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.removeEventListener("pagehide", onHide);
+      document.removeEventListener("visibilitychange", onVis);
+      flush(true);
+    };
+  }, [flush]);
+
   const start = useCallback((passage: Passage) => dispatch({ type: "start", passage }), []);
   const set = useCallback((patch: Partial<SessionState>) => dispatch({ type: "set", patch }), []);
   const addTalk = useCallback((items: TalkQuestion[]) => dispatch({ type: "addTalk", items }), []);
@@ -155,8 +223,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const api = useMemo(
-    () => ({ state, start, set, addTalk, addPractice, addWrite, setAnswer, setResult }),
-    [state, start, set, addTalk, addPractice, addWrite, setAnswer, setResult],
+    () => ({ state, loadedId, start, set, addTalk, addPractice, addWrite, setAnswer, setResult }),
+    [state, loadedId, start, set, addTalk, addPractice, addWrite, setAnswer, setResult],
   );
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;

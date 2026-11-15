@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { passages } from "@/entities/passage";
-import { useSession } from "@/entities/session";
 import { useToast } from "@/shared/feedback/ToastProvider";
 import { Card } from "@/shared/ui/Card";
 import { Pill, Tag, TagRow } from "@/shared/ui/Tag";
@@ -10,7 +9,6 @@ import styles from "./home.module.css";
 
 export function HomeScreen() {
   const router = useRouter();
-  const { start } = useSession();
   const toast = useToast();
 
   return (
@@ -30,7 +28,6 @@ export function HomeScreen() {
                   toast.show("준비 중인 지문이에요", { kind: "info" });
                   return;
                 }
-                start(p);
                 router.push(`/p/${p.id}/read`);
               }}
             >
