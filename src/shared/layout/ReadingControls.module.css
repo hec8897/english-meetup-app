@@ -1,0 +1,39 @@
+.seg {
+  display: flex;
+  height: var(--touch);
+  padding: 3px;
+  border-radius: 22px;
+  background: var(--fill);
+}
+.seg button {
+  width: 52px;
+  border: 0;
+  border-radius: 19px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+}
+.seg button.on {
+  background: var(--white);
+  color: var(--blue);
+  font-weight: 700;
+}
+.sizes {
+  display: flex;
+  gap: 8px;
+}
+.sizes button {
+  width: var(--touch);
+  height: var(--touch);
+  border: 0;
+  border-radius: 14px;
+  background: var(--white);
+  color: var(--text-2);
+  font-weight: 700;
+}
+.sizes button:disabled {
+  color: var(--border);
+  cursor: not-allowed;
+}
+.small { font-size: 13px; }
+.large { font-size: 18px; }

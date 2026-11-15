@@ -1,0 +1,4 @@
+.title { font-size: 18px; font-weight: 700; }
+.row { display: flex; justify-content: space-between; font-size: 16px; }
+.count { color: var(--blue); }
+.list { margin: 0; padding-left: 18px; line-height: 1.9; }

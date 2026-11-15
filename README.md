@@ -28,18 +28,19 @@ Next.js 16 (App Router) · React 19 · TypeScript · CSS Modules · Pretendard
 
 ## 구조
 
+FSD-lite. import 방향은 `app → features → entities → shared` 한 방향, 피처끼리 import 금지.
+
 ```
 src/
-├─ app/          화면 (/, /p/[id]/read|talk|study|practice|write|wrap)
-├─ components/   ui · layout · feedback · passage
-├─ data/         지문 콘텐츠(passages.ts)와 타입
-├─ lib/          session(진행 상태) · services(백엔드 연결 지점) · usePassage · markup
-└─ styles/       디자인 토큰
+├─ app/        Next 라우트만 (/, /p/[id]/read|talk|study|practice|write|wrap)
+├─ features/   단계별 화면 본문 (home · read · talk · study · practice · write · wrap)
+├─ entities/   passage(타입·콘텐츠·Reading·Compose) · session(진행 상태·usePassage·PassageGate)
+└─ shared/     ui · feedback · layout · api(services) · lib(markup) · styles(토큰)
 ```
 
 ## 현재 상태
 
-- 백엔드 없음. 영작 확인(`CheckService`)과 질문 더 만들기(`QuestionService`)는 `src/lib/services.ts`의 목업이다. 인터페이스는 그대로 두고 구현만 교체하면 된다.
+- 백엔드 없음. 영작 확인(`CheckService`)과 질문 더 만들기(`QuestionService`)는 `src/shared/api/services.ts`의 목업이다. 인터페이스는 그대로 두고 구현만 교체하면 된다.
 - 진행 상태는 `sessionStorage`에만 저장된다.
 - 지문 2개 중 1개(`dad-video-call`)만 콘텐츠가 있고, `library-tools`는 "준비 중".
 

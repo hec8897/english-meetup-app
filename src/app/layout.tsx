@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { SessionProvider } from "@/lib/session";
-import { ToastProvider } from "@/components/feedback/ToastProvider";
+import { SessionProvider } from "@/entities/session";
+import { ToastProvider } from "@/shared/feedback/ToastProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
