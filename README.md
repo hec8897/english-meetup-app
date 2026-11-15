@@ -45,7 +45,7 @@ src/
 
 ## 현재 상태
 
-- 백엔드 없음. 영작 확인(`CheckService`)과 질문 더 만들기(`QuestionService`)는 `src/shared/api/services.ts`의 목업이다. 인터페이스는 그대로 두고 구현만 교체하면 된다.
+- 백엔드 없음. 영작 확인(`CheckService`)과 질문 더 만들기(`QuestionService`)는 `src/shared/api/services.ts`에서 `/api/check`·`/api/questions`를 호출한다(서버가 LLM 호출).
 - 진행 상태는 `sessionStorage`에만 저장된다.
 - 지문 2개 중 1개(`dad-video-call`)만 콘텐츠가 있고, `library-tools`는 "준비 중".
 

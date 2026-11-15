@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-영어 모임 앱 프론트엔드. 지문을 읽고 → 대화 → 표현 학습 → 영작 → 확장 글쓰기 → 마무리하는 모바일 우선 학습 앱. 진도는 Next Route Handler + 로컬 Supabase(Postgres)에 저장한다(1인 사용, 로그인 없음). 영작 확인·질문 생성은 아직 목업. 계획: `docs/backend-plan.html`.
+영어 모임 앱 프론트엔드. 지문을 읽고 → 대화 → 표현 학습 → 영작 → 확장 글쓰기 → 마무리하는 모바일 우선 학습 앱. 진도는 Next Route Handler + 로컬 Supabase(Postgres)에 저장한다(1인 사용, 로그인 없음). 영작 확인(`/api/check`)·질문 더 만들기(`/api/questions`)는 서버에서 LLM 호출. 계획: `docs/backend-plan.html`.
 
 **이 프로젝트의 프론트엔드는 FSD(Feature-Sliced Design) 패턴을 사용한다.** 새 코드는 아래 "구조 (FSD-lite)" 규칙에 맞춰 둔다.
 
@@ -36,7 +36,7 @@ import 방향은 `app → features → entities → shared` 한 방향만. 역�
 - `src/server/` — **FSD 레이어 밖.** 프레임워크 무관 순수 TS 서버 로직(`db.ts`, `progress/{service,repo}.ts`). `src/app/api`에서만 import하고 features·entities·shared에서는 import 금지. 나중에 NestJS로 옮길 대상. 소유자는 `OWNER='me'` 고정(2차 회원 도입 시 user_id로 교체).
 - `src/app/api/progress/[passageId]` — 얇은 Route Handler. GET `{state|null}` · PUT `{state}`. 클라이언트는 `shared/api/progress.ts`, 동기화 로직은 `entities/session`(서버 GET 성공한 지문만 PUT, 디바운스 800ms).
 - `supabase/` — 마이그레이션·config. 테이블 `progress`·`passages`·`ai_usage`·`check_cache`, 전부 RLS ON + 정책 없음(service role로만 접근).
-- `src/shared/api/services.ts` — **백엔드 연결 지점.** `CheckService`(영작 확인), `QuestionService`(질문 더 만들기)가 목업. 인터페이스는 유지하고 `services` 객체 구현만 교체. 도메인 무관이라 shared.
+- `src/shared/api/services.ts` — **백엔드 연결 지점.** `CheckService`(영작 확인), `QuestionService`(질문 더 만들기)는 `fetch('/api/...')` 구현. 도메인 무관이라 shared.
 - `src/shared/lib/markup.tsx` — 콘텐츠 표기 파서. `src/shared/styles/tokens.css` — 디자인 토큰(A안 블루). 색·간격은 여기 변수만 쓴다.
 
 ## 규칙·주의

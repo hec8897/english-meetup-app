@@ -7,7 +7,7 @@ import { Screen } from "@/shared/layout/Screen";
 import { LinkButton } from "@/shared/ui/LinkButton";
 import { PageHeader } from "@/shared/ui/PageHeader";
 
-export function PracticeStep({ id, passage, state }: StepProps) {
+export function PracticeStep({ id, state }: StepProps) {
   const { setAnswer, setResult, addPractice } = useSession();
 
   return (
@@ -25,7 +25,7 @@ export function PracticeStep({ id, passage, state }: StepProps) {
         onResult={(k, r) => setResult("practice", k, r)}
         placeholder="영어로 써 보세요"
       />
-      <AddQuestion pool={passage.pool.practice} existing={state.practice} onAdded={addPractice} />
+      <AddQuestion kind="practice" passageId={id} existing={state.practice.map((q) => q.ko)} onAdded={addPractice} />
     </Screen>
   );
 }

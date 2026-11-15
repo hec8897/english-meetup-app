@@ -82,26 +82,7 @@ const dadVideoCall: Passage = {
     { id: "w4", ko: "그녀는 너무 웃어서 말을 잇지 못했다.", hint: { phrase: "laughed so hard", meaningKo: "너무 웃어서 ~할 정도로 웃다" } },
     { id: "w5", ko: "나는 주말에 친구들을 만나기를 기대하고 있다.", hint: { phrase: "looking forward to", meaningKo: "~을 기대하다" } },
   ],
-  pool: {
-    talk: [
-      { id: "tp1", kind: "의견", text: "What is the best way to teach someone older how to use a smartphone?" },
-      { id: "tp2", kind: "경험", text: "When was the last time you felt really proud of a family member?" },
-      { id: "tp3", kind: "의견", text: "Do you think the writer's sister helped Dad enough? Why or why not?" },
-      { id: "tp4", kind: "경험", text: "What was your first smartphone, and how did you learn to use it?" },
-      { id: "tp5", kind: "의견", text: "Why do you think the writer taped a list to the back of Dad's phone?" },
-      { id: "tp6", kind: "경험", text: "Have you ever had a call go wrong in a funny way?" },
-    ],
-    practice: [
-      { id: "pp1", ko: "아빠와 영상통화를 하면서 글쓴이는 무엇이 기대된다고 했나요?", hint: { phrase: "looking forward to", meaningKo: "~을 기대하다" }, model: "I'm looking forward to talking with Dad again." },
-      { id: "pp2", ko: "첫 통화 때 글쓴이는 몇 시에 전화를 받았나요? 어떤 상태였나요?", hint: { phrase: "half asleep", meaningKo: "반쯤 잠든" }, model: "I answered the call at seven, half asleep." },
-      { id: "pp3", ko: "영상통화 화면에 아빠의 코가 크게 나왔을 때 글쓴이는 어땠나요?", hint: { phrase: "laughed so hard", meaningKo: "너무 웃어서 ~할 정도로 웃다" }, model: "I laughed so hard that my stomach hurt." },
-    ],
-    write: [
-      { id: "wp1", ko: "그 코미디 영상을 보고 우리는 눈물이 날 정도로 웃었다.", hint: { phrase: "laughed so hard", meaningKo: "너무 웃어서 ~할 정도로 웃다" } },
-      { id: "wp2", ko: "나는 이번 휴가를 몹시 기대하고 있다.", hint: { phrase: "looking forward to", meaningKo: "~을 기대하다" } },
-      { id: "wp3", ko: "아버지는 반쯤 잠든 채로 신문을 읽고 계셨다.", hint: { phrase: "half asleep", meaningKo: "반쯤 잠든" } },
-    ],
-  },
+
 };
 
 const libraryTools: Passage = {
@@ -119,7 +100,6 @@ const libraryTools: Passage = {
   expressions: [],
   practice: [],
   write: [],
-  pool: { talk: [], practice: [], write: [] },
 };
 
 export const passages: Passage[] = [dadVideoCall, libraryTools];

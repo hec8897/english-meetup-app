@@ -9,7 +9,7 @@ import { PageHeader } from "@/shared/ui/PageHeader";
 import { NumberedRow, Pill } from "@/shared/ui/Tag";
 import styles from "./talk.module.css";
 
-export function TalkStep({ id, passage, state }: StepProps) {
+export function TalkStep({ id, state }: StepProps) {
   const { addTalk } = useSession();
 
   return (
@@ -29,7 +29,7 @@ export function TalkStep({ id, passage, state }: StepProps) {
           </NumberedRow>
         </Card>
       ))}
-      <AddQuestion pool={passage.pool.talk} existing={state.talk} onAdded={addTalk} />
+      <AddQuestion kind="talk" passageId={id} existing={state.talk.map((q) => q.text)} onAdded={addTalk} />
     </Screen>
   );
 }

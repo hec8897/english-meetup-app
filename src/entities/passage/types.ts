@@ -64,10 +64,4 @@ export interface Passage {
   expressions: Expression[];
   practice: PracticeItem[];
   write: WriteItem[];
-  /** "질문 더 만들기"용 후보 (백엔드 연결 전 목업) */
-  pool: {
-    talk: TalkQuestion[];
-    practice: PracticeItem[];
-    write: WriteItem[];
-  };
 }

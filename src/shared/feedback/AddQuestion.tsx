@@ -1,31 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { services } from "@/shared/api/services";
+import { services, type QuestionKind } from "@/shared/api/services";
 import { Button } from "@/shared/ui/Button";
 import { useToast } from "./ToastProvider";
 
 interface Props<T extends { id: string }> {
-  /** 질문 후보 */
-  pool: T[];
-  /** 이미 화면에 있는 질문 */
-  existing: T[];
+  kind: QuestionKind;
+  passageId: string;
+  /** 이미 화면에 있는 질문 본문 (중복 방지용) */
+  existing: string[];
   /** 새로 만든 질문을 받아 추가 */
   onAdded: (items: T[]) => void;
   label?: string;
 }
 
 /** 모든 질문 화면 공통 "질문 더 만들기" */
-export function AddQuestion<T extends { id: string }>({ pool, existing, onAdded, label = "질문 더 만들기" }: Props<T>) {
+export function AddQuestion<T extends { id: string }>({ kind, passageId, existing, onAdded, label = "질문 더 만들기" }: Props<T>) {
   const [busy, setBusy] = useState(false);
   const toast = useToast();
 
   async function run() {
     setBusy(true);
     try {
-      const items = await services.questions.generate({
-        pool,
-        existingIds: existing.map((q) => q.id),
+      const items = await services.questions.generate<T>({
+        kind,
+        passageId,
+        existing,
         count: 3,
       });
       onAdded(items);

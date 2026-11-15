@@ -7,7 +7,7 @@ import { Screen } from "@/shared/layout/Screen";
 import { LinkButton } from "@/shared/ui/LinkButton";
 import { PageHeader } from "@/shared/ui/PageHeader";
 
-export function WriteStep({ id, passage, state }: StepProps) {
+export function WriteStep({ id, state }: StepProps) {
   const { setAnswer, setResult, addWrite } = useSession();
 
   return (
@@ -26,7 +26,7 @@ export function WriteStep({ id, passage, state }: StepProps) {
         onResult={(k, r) => setResult("write", k, r)}
         placeholder="두세 문장으로 써 보세요"
       />
-      <AddQuestion pool={passage.pool.write} existing={state.write} onAdded={addWrite} />
+      <AddQuestion kind="write" passageId={id} existing={state.write.map((q) => q.ko)} onAdded={addWrite} />
     </Screen>
   );
 }
