@@ -1,0 +1,15 @@
+.wrap { padding: 56px var(--pad-x) 40px; display: flex; flex-direction: column; gap: 16px; }
+.head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.input {
+  width: 100%;
+  min-height: var(--touch);
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--white);
+  font-size: 16px;
+}
+.input:focus { border-color: var(--blue); outline: none; }
+.input[aria-invalid] { border-color: var(--red); }
+.input::placeholder { color: var(--muted); }
+.error { margin: -4px 0 0; font-size: 14px; color: var(--red); }
