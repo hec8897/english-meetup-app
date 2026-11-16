@@ -1,6 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
-// 임시 접근 코드 보호. 2차(로그인) 도입 시 이 파일·src/proxy.ts·/enter 를 통째로 지운다.
+// 임시 접근 코드 보호. 2차(로그인) 도입 시 이 파일·src/proxy.ts·/login 를 통째로 지운다.
 // Next 16 proxy 는 Node 런타임이 기본이라 node:crypto 를 그대로 쓴다.
 
 export const PASS_COOKIE = "app_pass";

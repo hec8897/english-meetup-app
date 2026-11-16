@@ -6,11 +6,11 @@ export function proxy(req: NextRequest) {
   if (!expected) return NextResponse.next();
 
   const { pathname } = req.nextUrl;
-  if (pathname === "/enter" || pathname === "/api/enter") return NextResponse.next();
+  if (pathname === "/login" || pathname === "/api/login") return NextResponse.next();
   if (checkPassCookie(req.cookies.get(PASS_COOKIE)?.value, expected)) return NextResponse.next();
 
   if (pathname.startsWith("/api/")) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  return NextResponse.redirect(new URL("/enter", req.url));
+  return NextResponse.redirect(new URL("/login", req.url));
 }
 
 export const config = {
