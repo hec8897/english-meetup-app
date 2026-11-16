@@ -92,6 +92,7 @@
     <ul>
       <li><b>한다 ① DB·백엔드</b>: 로컬 Supabase, 진도·답안 서버 저장(기기 간 이어하기), 생성된 지문 저장</li>
       <li><b>한다 ② AI</b>: 영작 확인(CheckService), 질문 더 만들기(QuestionService), <b>새 지문 + 지문 딸린 문제 일체 생성</b>(Passage 전체: 본문·번역·vocab·talk·expressions·practice·write)</li>
+      <li><b>한다 ③ 단어 뜻 조회</b>: 지문의 아무 단어나 누르면 뜻 토스트 — <code>[[단어]]</code> 표시 단어는 기존 vocab, 그 외는 <b>GCP Cloud Translation</b>(en→ko) + <code>word_cache</code> 캐시</li>
       <li><b>범위 한정</b>: 새 화면은 "지문 만들기" 진입점(홈) 1개만. 나머지 6단계 화면은 기존 것을 실데이터로 연결. <code>library-tools</code>("준비 중")는 생성기로 채울 수 있다</li>
       <li><b>안 한다</b>: 로그인, 프로필, 모임/모임원, RLS 사용자별 정책, 카카오 OAuth, 게스트 병합</li>
       <li><b>사용자 식별</b>: 없음. 데이터 소유자는 고정값 <code>'me'</code> 한 명. 모든 DB 접근은 서버(Route Handler, service role)만 — 브라우저는 DB 키를 갖지 않는다</li>
@@ -209,6 +210,7 @@
     <tr><td>로그인 <span class="tag t-warn">2차</span></td><td>카카오 OAuth + 이메일 매직링크</td><td>1차에는 불필요. 2차에 국내 모임원 진입장벽 최소화. 카카오 개발자 앱 등록(무료) 필요</td></tr>
     <tr><td>ORM</td><td><b>없음</b> (supabase-js + <code>supabase gen types</code>)</td><td>의존성 0 추가. Nest 이전 시점에 Prisma/TypeORM 도입. repo 파일만 교체</td></tr>
     <tr><td>마이그레이션</td><td>Supabase CLI SQL 파일 (git 관리)</td><td>RLS 정책도 같은 파일에 — 환경 재현 가능</td></tr>
+    <tr><td>단어 번역</td><td>GCP Cloud Translation (v2, API 키)</td><td>단순 번역은 LLM보다 저렴·빠름(월 50만 자 무료, 이후 100만 자당 약 $20 — 확인 필요). 서비스 계정 불필요한 v2 사용. 구글 결제 계정·키 관리가 추가됨</td></tr>
     <tr><td>검증</td><td>zod 1개</td><td>route 입력 검증 + Nest 이전 시 그대로 재사용 가능</td></tr>
   </table>
 </section>
@@ -253,6 +255,7 @@
     llm.ts                    <span class="m"># llm(prompt, zodSchema) — 공급자 교체 지점 1개</span>
     check/        service.ts  <span class="m"># 영작 확인: 규칙 필터 → 캐시 → LLM, 일일 상한</span>
     generate/     passage.ts questions.ts schema.ts  <span class="m"># 지문·문제 생성 + zod 검증(schema.ts)</span>
+    translate/    service.ts  <span class="m"># 단어 뜻: word_cache → GCP Translation</span>
     passages/     repo.ts     <span class="m"># seed(repo) + DB 지문 합쳐 조회</span>
     meetings/     service.ts  policy.ts  repo.ts
     members/      service.ts  policy.ts  repo.ts   <span class="m"># 역할별 권한은 policy.ts에 한 곳으로</span>
@@ -283,6 +286,7 @@ supabase/migrations/*.sql     <span class="m"># 스키마 + RLS</span></pre>
     <tr><th>테이블</th><th>핵심 컬럼</th><th>단계</th></tr>
     <tr><td><code>progress</code></td><td><b>1차</b>: <code>owner text default 'me'</code>, passage_id, <code>state jsonb</code>(SessionState 스냅샷), updated_at · unique(owner, passage_id). RLS ON + 정책 없음(service role만)<br><b>2차</b>: owner → <code>user_id uuid</code> (auth.users 참조)로 교체</td><td>P1 (1차)</td></tr>
     <tr><td><code>passages</code></td><td>id(text), <code>data jsonb</code>(= Passage 전체), source seed|ai, created_at. <code>progress.passage_id</code> 가 참조(FK 없이 문자열 — seed 지문은 DB 밖)</td><td>P2c (1차)</td></tr>
+    <tr><td><code>word_cache</code></td><td>word text PK(정규화된 소문자), ko text, created_at. 번역 결과 캐시(같은 단어 재호출 방지)</td><td>P2d (1차)</td></tr>
     <tr><td><code>ai_usage</code> / <code>check_cache</code></td><td>1차: (day, count) 전역 일일 상한 / (hint, answer_hash → result jsonb). 2차: 상한을 user_id별로 확장</td><td>P2 (1차)</td></tr>
     <tr><td><code>profiles</code></td><td>id(=auth.users.id), nickname, avatar_url</td><td>2차</td></tr>
     <tr><td><code>meetings</code></td><td>id, name, description, owner_id, invite_code, created_at</td><td>2차</td></tr>
@@ -336,6 +340,17 @@ supabase/migrations/*.sql     <span class="m"># 스키마 + RLS</span></pre>
       <li>홈에 "새 지문 만들기"(주제·카테고리·난이도 입력 → 생성 중 Loading → 저장 후 목록에 추가)</li>
       <li><code>server/generate/passage.ts</code>: 한 번에 Passage 전체 생성은 출력이 길어 실패 확률↑ → <b>2단계 호출</b>(① 본문+번역+vocab+expressions ② 그 본문 기반 talk/practice/write) + <code>schema.ts</code> 검증·1회 재시도</li>
       <li>완료 기준: 주제 하나 입력 → 6단계 전체가 끊김 없이 동작하는 지문 1개가 생성·저장·재방문 가능</li>
+    </ul>
+  </div></div>
+
+  <div class="card phase"><div class="n">P2d<span>1~1.5일</span></div><div>
+    <b>단어 뜻 조회 (GCP Cloud Translation)</b> — 지문 읽기 화면의 "아무 단어나 눌러서 뜻 보기"
+    <ul>
+      <li><code>server/translate/service.ts</code>: 단어 정규화(소문자·구두점 제거) → <code>word_cache</code> 조회 → 미스면 Translation v2 REST(<code>POST translate/v2?key=…</code>, source en · target ko, text 형식) → 캐시 저장. 키는 <code>GCP_TRANSLATE_API_KEY</code>(서버 전용, API 제한: Cloud Translation만)</li>
+      <li><code>app/api/translate</code> 얇은 POST(단어 1~40자 검증), 일일 문자 수 상한(env, 초과 시 429) — 비용 가드</li>
+      <li><code>entities/passage/Reading</code>: <code>[[단어]]</code>는 기존대로 vocab 토스트(호출 없음), 일반 단어 탭 시 API 호출 후 같은 토스트로 표시. 로딩·실패 문구는 기존 토스트 스타일 유지</li>
+      <li><b>한계(수용)</b>: 단어 단독 번역이라 다의어·활용형(<code>imagined</code>)은 부정확할 수 있음. 문제가 크면 이 서비스 내부만 LLM(문장 문맥 포함)로 교체 — API·화면은 그대로</li>
+      <li>사전 조건: GCP 프로젝트 + 결제 계정 연결(월 무료 한도 안이어도 API 활성화에 필요) + API 키 발급</li>
     </ul>
   </div></div>
 
@@ -422,6 +437,8 @@ supabase/migrations/*.sql     <span class="m"># 스키마 + RLS</span></pre>
     <tr><td>무료 DB 자동 백업 제한</td><td>실수로 데이터 삭제 시 복구 곤란</td><td>GitHub Actions 주 1회 <code>pg_dump</code> → 비공개 저장소/스토리지</td></tr>
     <tr><td>프로젝트 2개 한도</td><td>dev/prod 분리 불가</td><td>개발은 로컬 Docker가 대신하므로 해소. 클라우드 2개는 prod + 프리뷰용 dev로 사용</td></tr>
     <tr><td>Hobby 약관(비상업)</td><td>수익화 시 계정 제재 소지</td><td>제안 ⑤ — 수익화 계획 먼저 결정</td></tr>
+    <tr><td>GCP 비용·키 노출</td><td>결제 계정 연결로 과금 가능, 키 유출 시 타인이 사용</td><td>키를 서버 env에만(NEXT_PUBLIC_ 금지), GCP 콘솔에서 API 제한(Translation만)·예산 알림·일일 할당량 설정, 서버 일일 문자 상한, 캐시</td></tr>
+    <tr><td>단어 번역 품질(다의어·활용형)</td><td>문맥에 안 맞는 뜻 표시</td><td>수용하고 시작. 문제가 크면 translate 서비스 내부만 LLM(문장 포함)로 교체</td></tr>
     <tr><td>LLM이 규격 밖 지문을 생성</td><td>화면이 깨짐(vocab 누락 → 토스트 빈값, 문단 수 불일치 등)</td><td>zod + 도메인 규칙 검증 통과분만 저장, 실패 시 1회 재시도, 저장 전 미리보기 없이 오류로 처리. 생성 지문은 <code>source='ai'</code> 로 구분해 삭제 가능</td></tr>
     <tr><td>생성 시간(수십 초) 중 Vercel 함수 타임아웃</td><td>배포 환경에서 생성 도중 끊김</td><td>2단계 호출로 각 호출을 짧게. 로컬 개발 중엔 무관. 배포 시 함수 최대 실행시간 설정 확인</td></tr>
     <tr><td>AI 비용 폭주</td><td>무료 한도 소진 / 과금</td><td>제안 ⑥ — 캐시 + 일일 상한 + 규칙 선필터</td></tr>
@@ -436,7 +453,8 @@ supabase/migrations/*.sql     <span class="m"># 스키마 + RLS</span></pre>
   <div class="card">
     <b>확정된 결정</b>
     <ul>
-      <li>LLM: 개인 계정(dw.home) 종량제 + 일일 상한 (업무 계정 kowork 사용 안 함)</li>
+      <li>LLM: <b>OpenAI API</b>(모델 luna 예정, <code>OPENAI_MODEL</code> env로 교체 가능) + 일일 상한 — 이전 "개인 계정 종량제"에서 변경. 업무 계정(kowork)은 사용 안 함</li>
+      <li>단어 뜻 조회: <b>GCP Cloud Translation</b>을 사용, <b>MVP 1차 범위 안</b>(P2d). 키는 사용자가 제공</li>
       <li>지문 생성 입력: 직접 입력 + 카테고리·난이도</li>
       <li>모임 구조: 고정 멤버 모임 + 회차(meetings → meeting_members → events → attendances)</li>
       <li>수익화: 당분간 없음 → Vercel Hobby로 진행</li>
