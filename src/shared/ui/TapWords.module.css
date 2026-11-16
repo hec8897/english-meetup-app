@@ -1,0 +1,13 @@
+/* 평소엔 글자처럼 보이고, 누르면 뜻이 떠요 */
+.tap {
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tap:hover,
+.tap:active { background: var(--blue-light); }

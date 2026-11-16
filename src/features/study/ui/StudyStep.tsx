@@ -2,6 +2,7 @@
 
 import { useSession, type StepProps } from "@/entities/session";
 import { renderBold } from "@/shared/lib/markup";
+import { TapWords } from "@/shared/ui/TapWords";
 import { Screen } from "@/shared/layout/Screen";
 import { BlankInput } from "@/shared/ui/BlankInput";
 import { Card } from "@/shared/ui/Card";
@@ -32,7 +33,7 @@ export function StudyStep({ id, passage, state }: StepProps) {
             </div>
           </NumberedRow>
           <div className={styles.source}>
-            <p>{renderBold(ex.sourceEn, styles.mark)}</p>
+            <p><TapWords text={ex.sourceEn} markClassName={styles.mark} /></p>
             <p className="sub">{ex.sourceKo}</p>
           </div>
           <ul className={styles.examples}>

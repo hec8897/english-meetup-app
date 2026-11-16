@@ -1,6 +1,6 @@
 /**
  * 백엔드 연결 지점. 인터페이스는 그대로 두고 구현만 교체해요.
- * check·questions 모두 서버 구현(app/api).
+ * check·questions·words(단어 뜻) 모두 서버 구현(app/api).
  */
 
 export type CheckStatus = "good" | "fix" | "missing-hint";
@@ -31,6 +31,25 @@ export interface QuestionService {
     count: number;
   }): Promise<T[]>;
 }
+
+export interface WordService {
+  /** 영어 단어 하나의 한국어 뜻. 단어 단독 번역(문맥 없음)이에요. */
+  lookup(input: { word: string }): Promise<{ ko: string }>;
+}
+
+// 서버: POST /api/translate (word_cache → GCP Translation). 실패(네트워크·429·500)는 throw → Reading이 "뜻을 찾지 못했어요"로 안내.
+const httpWordService: WordService = {
+  async lookup(input) {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(input),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`translate API ${res.status}`);
+    return (await res.json()) as { ko: string };
+  },
+};
 
 // 서버: POST /api/check (규칙 → 캐시 → LLM). 실패(네트워크·429·500)는 throw → 호출 화면이 토스트로 안내.
 const httpCheckService: CheckService = {
@@ -64,4 +83,5 @@ const httpQuestionService: QuestionService = {
 export const services = {
   check: httpCheckService,
   questions: httpQuestionService,
+  words: httpWordService,
 };
