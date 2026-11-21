@@ -42,12 +42,12 @@ interface ResponsesBody {
   output?: { type: string; content?: { type: string; text?: string; refusal?: string }[] }[];
 }
 
-async function callOnce<T>(body: Json, schema: z.ZodType<T>, key: string): Promise<T> {
+async function callOnce<T>(body: Json, schema: z.ZodType<T>, key: string, timeoutMs: number): Promise<T> {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) throw new Error(`OpenAI ${res.status}: ${(await res.text()).slice(0, 500)}`);
   const data = (await res.json()) as ResponsesBody;
@@ -66,11 +66,13 @@ export async function llm<T>({
   user,
   schema,
   maxOutputTokens = 2000,
+  timeoutMs = TIMEOUT_MS,
 }: {
   system: string;
   user: string;
   schema: z.ZodType<T>;
   maxOutputTokens?: number;
+  timeoutMs?: number;
 }): Promise<T> {
   const key = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL;
@@ -87,11 +89,11 @@ export async function llm<T>({
   };
 
   try {
-    return await callOnce(body, schema, key);
+    return await callOnce(body, schema, key, timeoutMs);
   } catch (err) {
     console.error("[llm] attempt 1 failed, retrying", err);
     try {
-      return await callOnce(body, schema, key);
+      return await callOnce(body, schema, key, timeoutMs);
     } catch (err2) {
       console.error("[llm] attempt 2 failed", err2);
       throw new Error("LLM call failed");

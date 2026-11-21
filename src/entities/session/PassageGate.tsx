@@ -13,11 +13,11 @@ export interface StepProps {
   state: SessionState;
 }
 
-/** 단계 페이지 공통: 주소의 지문을 세션과 맞추고, 없으면 404, 맞추는 중엔 로딩 */
+/** 단계 페이지 공통: 지문을 서버에서 받아 세션과 맞추고, 없으면 404, 받는/맞추는 중엔 로딩 */
 export function PassageGate({ render: Step }: { render: ComponentType<StepProps> }) {
   const { id } = useParams<{ id: string }>();
   const { passage, synced, state } = usePassage(id);
-  if (!passage) notFound();
-  if (!synced) return <Loading />;
+  if (passage === null) notFound();
+  if (!passage || !synced) return <Loading />;
   return <Step id={id} passage={passage} state={state} />;
 }
